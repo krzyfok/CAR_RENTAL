@@ -1,12 +1,12 @@
 import java.util.Scanner;
 import java.sql.*;
-public class DataBase {
+public class Login {
 
-    public static int AdminLog()
+    private int userlogin()
     {
         Scanner sc = new Scanner(System.in);
 
-
+        String user_type="user";
 
         System.out.print("LOGIN: ");
         String login = sc.next();
@@ -19,22 +19,37 @@ public class DataBase {
 
             Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-            ResultSet rs=stmt.executeQuery("select * from adminlogs WHERE login='" + login + "'");
+            ResultSet rs=stmt.executeQuery("select * from users WHERE login='" + login + "'");
            while (rs.next()) {
                 String _password = rs.getString(2);
-               if(password.equals(_password)){
-                   return 1;}
 
+
+               if(password.equals(_password)){
+
+               user_type=rs.getString(6);
+               switch (user_type) {
+                   case "user":
+                      return 1;
+
+                   case "admin":
+                       AdminMenu.id=rs.getInt(1);
+
+                       return 2;
+
+                   default:
+                       System.out.println("ERROR");
+                       continue;
+               }}
            }
            con.close();
         }
         catch(Exception e){ System.out.println(e);}
        return 0;
     }
-    public static int UserSignUp()
+    private int usersignup()
     {
         Scanner sc = new Scanner(System.in);
-        int user_id=
+
         try{
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental","root","root");
@@ -65,19 +80,61 @@ public class DataBase {
                 System.out.print("RETYPE PASSWORD: ");
                 password2=sc.next();
             }
-            String sql= "insert into users(id,name,surname,login,password)"+ "values(?,?,?,?,?)";
+            String sql= "insert into users(name,surname,login,password,type)"+ "values(?,?,?,?,?)";
             PreparedStatement preparedStm =con.prepareStatement(sql);
-            preparedStm.setInt(1,user_id);
-            preparedStm.setString(2,name);
-            preparedStm.setString(3,surname);
-            preparedStm.setString(4,login);
-            preparedStm.setString(5,password1);
+
+            preparedStm.setString(1,name);
+            preparedStm.setString(2,surname);
+            preparedStm.setString(3,login);
+            preparedStm.setString(4,password1);
+            preparedStm.setString(5,"user");
             preparedStm.execute();
-            user_id++;
+
             con.close();
         }
         catch(Exception e){ System.out.println(e);}
-        return 0;
+        return 1;
+    }
+    public static void login()
+    {
+        Scanner scan = new Scanner(System.in);
+        Login newlogin = new Login();
+        int x= newlogin.userlogin();
+        while(x==0)
+        {
+            System.out.println("TRY AGAIN");
+            Menu.clear();
+            x= newlogin.userlogin();
+        }
+        System.out.println("SUCCES");
+        Menu.clear();
+
+        switch (x) {
+            case 1:
+                UserMenu.menu();
+                break;
+            case 2:
+                AdminMenu.menu();
+                break;
+
+            default:
+                System.out.println("ERROR");
+
+        }
+
+
+
     }
 
+    public static void user_sign_up()
+    {
+        Login newsignup = new Login();
+        if(newsignup.usersignup()==1);
+        {
+            Menu.clear();
+            UserMenu usermenu =new UserMenu();
+            login();
+        }
+
+    }
 }

@@ -1,9 +1,14 @@
-import java.util.Scanner;
-
 public class UserMenu {
-    public static void user_sign_up()
-    {
-      DataBase.UserSignUp();
 
+    private void usermenu()
+    {
+        System.out.println("USER MENU");
     }
+    public static void menu()
+    {
+        UserMenu Usermennu = new UserMenu();
+        Usermennu.usermenu();
+    }
+
+
 }
