@@ -38,7 +38,7 @@ public class AdminMenu{
                             newadminsesion.printcars();
                             break;
                         case 4:
-
+                            newadminsesion.carlist_edit();
                             break;
                         case 5:
 
@@ -112,7 +112,6 @@ public class AdminMenu{
 
             Statement stmt=cosn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rss=stmt.executeQuery("select * from cars");
-            System.out.println("ID BRAND   MODEL   STATUS  ");
 
 
             for(int i=0;i<49;i++) System.out.print("-");System.out.print("\n");
@@ -125,5 +124,66 @@ public class AdminMenu{
         }
         catch (Exception e){ System.out.println(e);}
     }
+    private void carlist_edit() {
+        try {
+
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Scanner sc = new Scanner(System.in);
+
+            System.out.println("1. ADD NEW WEHICLE");
+            System.out.println("2. DELETE WEHICLE");
+            try {
+
+                int x = sc.nextInt();
+                switch (x) {
+                    case 1:
+
+                            System.out.print("BRAND: ");
+                            String brand = sc.next();
+                            System.out.print("MODEL: ");
+                            String model = sc.next();
+
+
+                            String sql = "insert into cars(brand,model,status)" + "values(?,?,?)";
+                            PreparedStatement preparedStm = con.prepareStatement(sql);
+
+                            preparedStm.setString(1, brand);
+                            preparedStm.setString(2, model);
+                            preparedStm.setString(3, "FREE");
+
+                            preparedStm.execute();
+
+                            con.close();
+
+                        break;
+
+                    case 2:
+
+                            System.out.print("DELETE VEHICLE, ID:  ");
+                            int y = sc.nextInt();
+
+                            String query = "delete from cars where id = ?";
+                            PreparedStatement preparedStmt = con.prepareStatement(query);
+                            preparedStmt.setInt(1, y);
+                            preparedStmt.execute();
+
+                            con.close();
+
+                        break;
+                    default:
+                        System.out.println("ERROR, TRY AGAIN ");
+                }
+            } catch (InputMismatchException exception) {
+                System.out.println("ERROR, TRY AGAIN");
+            }
+
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+
 
 }
