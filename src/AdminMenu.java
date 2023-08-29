@@ -19,9 +19,11 @@ public class AdminMenu{
                 System.out.println("2. DELETE USER");
                 System.out.println("3. PRINT VEHICLE LIST");
                 System.out.println("4. EDIT VEHICLE LIST");
-                System.out.println("5. PRINT ACTIVE RENTALS");
-                System.out.println("6. ADD ADMIN");
-                System.out.println("7. LOGOUT");
+                System.out.println("5. PRINT RENTALS HISTORY");
+                System.out.println("6. RENTAL DETAILS");
+                System.out.println("7. END RENTAL");
+                System.out.println("8. ADD ADMIN");
+                System.out.println("9. LOGOUT");
                 try {
                     Scanner sc = new Scanner(System.in);
                     int x = sc.nextInt();
@@ -41,12 +43,19 @@ public class AdminMenu{
                             newadminsesion.carlist_edit();
                             break;
                         case 5:
-
+                            newadminsesion.print_rentals();
                             break;
                         case 6:
+
                             break;
 
                         case 7:
+                            newadminsesion.end_rental();
+                            break;
+                        case 8:
+
+                        break;
+                        case 9:
                             exit=true;
                             break;
 
@@ -93,15 +102,23 @@ public class AdminMenu{
             }
             else{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+            Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rs=stmt.executeQuery("select * from users WHERE id='" + x + "'");
+                if(rs.next()){
+                    String query = "delete from users where id = ?";
+                    PreparedStatement preparedStmt = con.prepareStatement(query);
+                    preparedStmt.setInt(1, x);
+                    preparedStmt.execute();
+                    System.out.println("SUCCES");
+                }
+                else {
+                    System.out.println("ERROR");
+                }
 
-
-            String query = "delete from users where id = ?";
-            PreparedStatement preparedStmt = con.prepareStatement(query);
-            preparedStmt.setInt(1, x);
-            preparedStmt.execute();
 
             con.close();
-        }}
+            }
+        }
         catch (Exception e){ System.out.println(e);}
     }
     private void printcars()
@@ -128,6 +145,7 @@ public class AdminMenu{
         try {
 
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+            Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
             Scanner sc = new Scanner(System.in);
 
@@ -153,7 +171,6 @@ public class AdminMenu{
                             preparedStm.setString(3, "FREE");
 
                             preparedStm.execute();
-
                             con.close();
 
                         break;
@@ -164,12 +181,17 @@ public class AdminMenu{
                             int y = sc.nextInt();
 
                             String query = "delete from cars where id = ?";
+                            ResultSet rs=stmt.executeQuery("select * from cars WHERE id='" + y + "'");
+                        if(rs.next()) {
                             PreparedStatement preparedStmt = con.prepareStatement(query);
                             preparedStmt.setInt(1, y);
                             preparedStmt.execute();
+                            System.out.println("SUCCES");}
 
-                            con.close();
-
+                        else {
+                            System.out.println("ERROR");
+                        }
+                        con.close();
                         break;
                     default:
                         System.out.println("ERROR, TRY AGAIN ");
@@ -185,5 +207,74 @@ public class AdminMenu{
     }
 
 
+    private void print_rentals()
+    {
+        try{ Connection cosn= DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental","root","root");
+
+         Statement stmt=cosn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rss=stmt.executeQuery("select * from rentals");
+
+         for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+         System.out.printf("|%4s|%10s|%7s|%6s|%21s|%21s|%8s|\n","ID ","VEHICLE ID" ,  "USER ID" ,"STATUS", "START DATE     ","END DATE     ","DURATION");
+         for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+         while (rss.next())
+         { System.out.printf("|%-4s|%-10s|%-7s|%-6s|%-21s|%-21s|%8s|\n",rss.getInt(1),rss.getInt(2) ,  rss.getInt(3) , rss.getString(4),rss.getTimestamp(5),rss.getTimestamp(6),rss.getInt(7));
+             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+         }
+
+        }
+        catch (Exception e) {
+         System.out.println(e);
+        }
+    }
+    private static Timestamp getCurrentTimeStamp() {
+
+        java.util.Date today = new java.util.Date();
+        return new Timestamp(today.getTime());
+
+    }
+    private void end_rental()
+    {
+        try {
+            Scanner sc = new Scanner(System.in);
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+            System.out.print("RENTAL ID= ");
+            int x =sc.nextInt();
+            ResultSet rs = stmt.executeQuery("select * from rentals WHERE id='"+x+"'");
+            if(rs.next()&& rs.getString(4).equals("ACTIVE") )
+            {
+
+                String query = "update rentals set end_date = ? where id = ?";
+                PreparedStatement preparedStmt = con.prepareStatement(query);
+                preparedStmt.setTimestamp  (1, getCurrentTimeStamp());
+                preparedStmt.setInt(2, x);
+                preparedStmt.executeUpdate();
+
+                query = "update rentals set status = ? where id = ?";
+                preparedStmt = con.prepareStatement(query);
+                preparedStmt.setString  (1, "ENDED");
+                preparedStmt.setInt(2, x);
+                preparedStmt.executeUpdate();
+
+                query = "update rentals set duration = ? where id = ?";
+                preparedStmt = con.prepareStatement(query);
+                preparedStmt.setInt(1, rs.getTimestamp(6).getDate()-rs.getTimestamp(5).getDate()+1);
+                preparedStmt.setInt(2, x);
+                preparedStmt.executeUpdate();
+            }
+            else
+            {
+                System.out.println("ERROR");
+            }
+
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
 
 }

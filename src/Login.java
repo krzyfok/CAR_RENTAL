@@ -21,7 +21,7 @@ public class Login {
 
             ResultSet rs=stmt.executeQuery("select * from users WHERE login='" + login + "'");
            while (rs.next()) {
-                String _password = rs.getString(2);
+                String _password = rs.getString(5);
 
 
                if(password.equals(_password)){
@@ -97,7 +97,7 @@ public class Login {
     }
     public static void login()
     {
-        Scanner scan = new Scanner(System.in);
+
         Login newlogin = new Login();
         int x= newlogin.userlogin();
         while(x==0)
