@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 public class AdminMenu{
@@ -46,9 +47,8 @@ public class AdminMenu{
                             newadminsesion.print_rentals();
                             break;
                         case 6:
-
+                             newadminsesion.rentals_details();
                             break;
-
                         case 7:
                             newadminsesion.end_rental();
                             break;
@@ -182,7 +182,8 @@ public class AdminMenu{
 
                             String query = "delete from cars where id = ?";
                             ResultSet rs=stmt.executeQuery("select * from cars WHERE id='" + y + "'");
-                        if(rs.next()) {
+
+                        if(rs.next()&&(rs.getString(4).equals("FREE"))) {
                             PreparedStatement preparedStmt = con.prepareStatement(query);
                             preparedStmt.setInt(1, y);
                             preparedStmt.execute();
@@ -221,7 +222,7 @@ public class AdminMenu{
          { System.out.printf("|%-4s|%-10s|%-7s|%-6s|%-21s|%-21s|%8s|\n",rss.getInt(1),rss.getInt(2) ,  rss.getInt(3) , rss.getString(4),rss.getTimestamp(5),rss.getTimestamp(6),rss.getInt(7));
              for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
          }
-
+            cosn.close();
         }
         catch (Exception e) {
          System.out.println(e);
@@ -264,6 +265,21 @@ public class AdminMenu{
                 preparedStmt.setInt(1, rs.getTimestamp(6).getDate()-rs.getTimestamp(5).getDate()+1);
                 preparedStmt.setInt(2, x);
                 preparedStmt.executeUpdate();
+                try {
+
+
+
+                    query = "update cars set status = ? where id =?";
+                    preparedStmt = con.prepareStatement(query);
+                    preparedStmt.setString  (1, "FREE");
+                    preparedStmt.setInt(2, rs.getInt(2));
+                    preparedStmt.executeUpdate();
+                    con.close();
+                }
+                catch (Exception e) {
+                    System.out.println(e);
+                }
+                con.close();
             }
             else
             {
@@ -276,5 +292,114 @@ public class AdminMenu{
         }
 
     }
+    private void rentals_details()
+    {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("ID: ");
+        int rental_id= sc.nextInt();
+    try {
+         Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
 
-}
+         Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+         ResultSet rss = stmt.executeQuery("select * from rentals WHERE id='"+rental_id+"'");
+         if(rss.next())
+         {
+             int vehicle_id= rss.getInt(2);
+
+             int user_id=rss.getInt(3);
+             String status= rss.getString(4);
+             Timestamp start= rss.getTimestamp(5);
+             Timestamp end= rss.getTimestamp(6);
+             int duration = rss.getInt(7);
+
+             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+             System.out.printf("|%4s|%10s|%10s|%7s|%6s|%21s|%21s|%21s|%8s|\n","RENTAL ID ","STATUS","USER NAME" ,  "USER SURNAME" ,"CAR BRAND", "CAR MODEL","START DATE     ","END DATE     ","DURATION");
+             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+             System.out.printf("|%4s|%10s|%10s|%7s|%6s|%21s|%21s|%21s|%8s|\n",rental_id,status,get_user_name(user_id) ,  get_user_surname(user_id) ,get_car_brand(vehicle_id), get_car_model(vehicle_id),start,end,duration);
+             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+         }
+
+         else {
+             System.out.print("ERROR");
+
+         }
+        con.close();
+
+
+        }
+    catch (Exception e) {
+        System.out.println(e);
+    }
+    }
+    private static String get_car_brand(int id)
+    {
+        try{
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss = stmt.executeQuery("select * from cars WHERE id='"+id+"'");
+            rss.next();
+            String brand=rss.getString(2);
+            con.close();
+            return brand;
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return "ERROR";
+        }
+    }
+    private static String get_car_model(int id)
+    {
+        try{
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss = stmt.executeQuery("select * from cars WHERE id='"+id+"'");
+            rss.next();
+            String model=rss.getString(3);
+            con.close();
+            return model;
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return "ERROR";
+        }
+    }
+    private static String get_user_name(int id)
+    {
+        try{
+        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        ResultSet rss = stmt.executeQuery("select * from users WHERE id='"+id+"'");
+        rss.next();
+        String name=rss.getString(2);
+        con.close();
+        return name;
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return "ERROR";
+        }
+    }
+    private static String get_user_surname(int id)
+    {
+        try{
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss = stmt.executeQuery("select * from users WHERE id='"+id+"'");
+            rss.next();
+            String surname=rss.getString(3);
+            con.close();
+            return surname;
+        }
+        catch (Exception e) {
+            System.out.println(e);
+            return "ERROR";
+        }
+    }
+    }
+
+
+
