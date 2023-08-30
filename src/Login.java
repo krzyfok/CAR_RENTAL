@@ -35,6 +35,9 @@ public class Login {
                        AdminMenu.id=rs.getInt(1);
 
                        return 2;
+                   case "OWNER":
+                       AdminMenu.id=rs.getInt(1);
+                       return 3;
 
                    default:
                        System.out.println("ERROR");
@@ -115,6 +118,9 @@ public class Login {
                 break;
             case 2:
                 AdminMenu.menu();
+                break;
+            case 3:
+                OwnerMenu.menu();
                 break;
 
             default:

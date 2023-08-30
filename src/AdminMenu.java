@@ -4,16 +4,16 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 public class AdminMenu{
     public static int id;
-    public static void menu()
-    {
+    public static void menu(){
 
-        AdminMenu.adminmenu();
+        AdminMenu admin = new AdminMenu();
+        admin.adminmenu();
     }
 
-        private static void adminmenu()
+        protected  void adminmenu()
         {
             boolean exit=false;
-            AdminMenu newadminsesion = new AdminMenu();
+
           while(!exit) {
                 System.out.println("ADMIN MENU");
                 System.out.println("1. PRINT ALL USERS");
@@ -23,46 +23,42 @@ public class AdminMenu{
                 System.out.println("5. PRINT RENTALS HISTORY");
                 System.out.println("6. RENTAL DETAILS");
                 System.out.println("7. END RENTAL");
-                System.out.println("8. ADD ADMIN");
-                System.out.println("9. LOGOUT");
+                System.out.println("8. LOGOUT");
                 try {
                     Scanner sc = new Scanner(System.in);
                     int x = sc.nextInt();
 
                     switch (x) {
                         case 1:
-                            newadminsesion.printusers();
+                            printusers();
                             break;
 
                         case 2:
-                            newadminsesion.deleteuser();
+                          deleteuser();
                             break;
                         case 3:
-                            newadminsesion.printcars();
+                           printcars();
                             break;
                         case 4:
-                            newadminsesion.carlist_edit();
+                            carlist_edit();
                             break;
                         case 5:
-                            newadminsesion.print_rentals();
+                           print_rentals();
                             break;
-                        case 6:
-                             newadminsesion.rentals_details();
+                        case 6://sprawdzic
+                             rentals_details();
                             break;
                         case 7:
-                            newadminsesion.end_rental();
+                            end_rental();
                             break;
-                        case 8:
 
-                        break;
-                        case 9:
+                        case 8:
                             exit=true;
                             break;
 
 
                         default:
                             System.out.println("ERROR, TRY AGAIN ");
-                           // continue;
                     }
 
                 } catch (InputMismatchException exception) {
@@ -71,14 +67,14 @@ public class AdminMenu{
             }
         }
 
-    private void printusers()
+    protected static void printusers()
     {
         try {
 
             Connection cosn= DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental","root","root");
 
             Statement stmt=cosn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rss=stmt.executeQuery("select * from users");
+            ResultSet rss=stmt.executeQuery("select * from users WHERE type = 'user'");
             for(int i=0;i<61;i++) System.out.print("-");System.out.print("\n");
             System.out.printf("|%4s|%10s|%10s|%10s|%10s|%10s|\n","ID ","NAME   " ,  "SURNAME " , "LOGIN   ",   "PASSWORD " ,  "TYPE   ");
             for(int i=0;i<61;i++) System.out.print("-");System.out.print("\n");
@@ -90,7 +86,7 @@ public class AdminMenu{
         }
         catch (Exception e){ System.out.println(e);}
     }
-    private void deleteuser() {
+    protected  static void deleteuser() {
         try {
             Scanner sc = new Scanner(System.in);
 
@@ -98,13 +94,13 @@ public class AdminMenu{
             int x = sc.nextInt();
             if(x==id)
             {
-                System.out.println("ERROR");
+                System.out.println("YOU CANT DELETE YOUR ACCOUNT");
             }
             else{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
             Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             ResultSet rs=stmt.executeQuery("select * from users WHERE id='" + x + "'");
-                if(rs.next()){
+                if(rs.next()&& !rs.getString(6).equals("OWNER")){
                     String query = "delete from users where id = ?";
                     PreparedStatement preparedStmt = con.prepareStatement(query);
                     preparedStmt.setInt(1, x);
@@ -112,7 +108,7 @@ public class AdminMenu{
                     System.out.println("SUCCES");
                 }
                 else {
-                    System.out.println("ERROR");
+                    System.out.println("YOU CANT DELETE THIS USER");
                 }
 
 
@@ -121,7 +117,7 @@ public class AdminMenu{
         }
         catch (Exception e){ System.out.println(e);}
     }
-    private void printcars()
+    protected  static void printcars()
     {
         try {
 
@@ -141,7 +137,7 @@ public class AdminMenu{
         }
         catch (Exception e){ System.out.println(e);}
     }
-    private void carlist_edit() {
+    protected static void carlist_edit() {
         try {
 
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
@@ -208,7 +204,7 @@ public class AdminMenu{
     }
 
 
-    private void print_rentals()
+    protected static void print_rentals()
     {
         try{ Connection cosn= DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental","root","root");
 
@@ -228,13 +224,13 @@ public class AdminMenu{
          System.out.println(e);
         }
     }
-    private static Timestamp getCurrentTimeStamp() {
+    private  static Timestamp getCurrentTimeStamp() {
 
         java.util.Date today = new java.util.Date();
         return new Timestamp(today.getTime());
 
     }
-    private void end_rental()
+    protected static  void end_rental()
     {
         try {
             Scanner sc = new Scanner(System.in);
@@ -292,7 +288,7 @@ public class AdminMenu{
         }
 
     }
-    private void rentals_details()
+    protected static void rentals_details()
     {
         Scanner sc = new Scanner(System.in);
         System.out.print("ID: ");
@@ -312,11 +308,11 @@ public class AdminMenu{
              Timestamp end= rss.getTimestamp(6);
              int duration = rss.getInt(7);
 
-             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
-             System.out.printf("|%4s|%10s|%10s|%7s|%6s|%21s|%21s|%21s|%8s|\n","RENTAL ID ","STATUS","USER NAME" ,  "USER SURNAME" ,"CAR BRAND", "CAR MODEL","START DATE     ","END DATE     ","DURATION");
-             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
-             System.out.printf("|%4s|%10s|%10s|%7s|%6s|%21s|%21s|%21s|%8s|\n",rental_id,status,get_user_name(user_id) ,  get_user_surname(user_id) ,get_car_brand(vehicle_id), get_car_model(vehicle_id),start,end,duration);
-             for(int i=0;i<85;i++) System.out.print("-");System.out.print("\n");
+             for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
+             System.out.printf("|%10s|%6s|%9s|%12s|%9s|%9s|%21s|%21s|%8s|\n","RENTAL ID","STATUS","USER NAME" ,  "USER SURNAME" ,"CAR BRAND", "CAR MODEL","START DATE     ","END DATE     ","DURATION");
+             for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
+             System.out.printf("|%10s|%6s|%9s|%12s|%9s|%9s|%21s|%21s|%8s|\n",rental_id,status,get_user_name(user_id) ,  get_user_surname(user_id) ,get_car_brand(vehicle_id), get_car_model(vehicle_id),start,end,duration);
+             for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
          }
 
          else {
@@ -331,7 +327,7 @@ public class AdminMenu{
         System.out.println(e);
     }
     }
-    private static String get_car_brand(int id)
+    private  static String get_car_brand(int id)
     {
         try{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
@@ -399,6 +395,8 @@ public class AdminMenu{
             return "ERROR";
         }
     }
+
+
     }
 
 
