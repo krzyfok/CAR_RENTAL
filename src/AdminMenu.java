@@ -3,7 +3,7 @@ import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 public class AdminMenu{
-    public static int id;
+    public static int admin_id;
     public static void menu(){
 
         AdminMenu admin = new AdminMenu();
@@ -87,35 +87,40 @@ public class AdminMenu{
         catch (Exception e){ System.out.println(e);}
     }
     protected  static void deleteuser() {
-        try {
-            Scanner sc = new Scanner(System.in);
 
-            System.out.print("DELETE USER, ID:  ");
-            int x = sc.nextInt();
-            if(x==id)
-            {
-                System.out.println("YOU CANT DELETE YOUR ACCOUNT");
-            }
-            else{
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
-            Statement stmt=con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rs=stmt.executeQuery("select * from users WHERE id='" + x + "'");
-                if(rs.next()&& !rs.getString(6).equals("OWNER")){
-                    String query = "delete from users where id = ?";
-                    PreparedStatement preparedStmt = con.prepareStatement(query);
-                    preparedStmt.setInt(1, x);
-                    preparedStmt.execute();
-                    System.out.println("SUCCES");
+            try {
+                Scanner sc = new Scanner(System.in);
+
+                System.out.print("DELETE USER, ID:  ");
+                int x = sc.nextInt();
+                if (x == admin_id) {
+                    System.out.println("YOU CANT DELETE YOUR ACCOUNT");
+                } else {
+                    try {
+                        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+                        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                        ResultSet rs = stmt.executeQuery("select * from users WHERE id='" + x + "'");
+                        if (rs.next() && !rs.getString(6).equals("OWNER") && !rs.getString(6).equals("admin")) {
+                            String query = "delete from users where id = ?";
+                            PreparedStatement preparedStmt = con.prepareStatement(query);
+                            preparedStmt.setInt(1, x);
+                            preparedStmt.execute();
+                            System.out.println("SUCCES");
+                        } else {
+                            System.out.println("YOU CANT DELETE THIS USER");
+                        }
+
+
+                        con.close();
+                    } catch (Exception e) {
+                        System.out.println(e);
+                    }
                 }
-                else {
-                    System.out.println("YOU CANT DELETE THIS USER");
-                }
-
-
-            con.close();
             }
-        }
-        catch (Exception e){ System.out.println(e);}
+            catch (InputMismatchException exception) {
+                System.out.println("ERROR, TRY AGAIN");
+            }
+
     }
     protected  static void printcars()
     {

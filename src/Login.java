@@ -29,14 +29,15 @@ public class Login {
                user_type=rs.getString(6);
                switch (user_type) {
                    case "user":
+                       UserMenu.user_id=rs.getInt(1);
                       return 1;
 
                    case "admin":
-                       AdminMenu.id=rs.getInt(1);
+                       AdminMenu.admin_id=rs.getInt(1);
 
                        return 2;
                    case "OWNER":
-                       AdminMenu.id=rs.getInt(1);
+                       AdminMenu.admin_id=rs.getInt(1);
                        return 3;
 
                    default:
