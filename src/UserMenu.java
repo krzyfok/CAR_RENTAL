@@ -2,7 +2,7 @@ import java.sql.*;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-public class UserMenu {
+public class UserMenu implements Rentals_details{
     public static int user_id;
 
     public static void menu()
@@ -21,8 +21,7 @@ public class UserMenu {
             System.out.println("3. YOUR ACTIVE RENTALS");
             System.out.println("4. END RENTAL");
             System.out.println("5. PRINT RENTALS HISTORY");
-            System.out.println("6. RENTAL DETAILS");
-            System.out.println("7. LOGOUT");
+            System.out.println("6. LOGOUT");
             try {
                 Scanner sc = new Scanner(System.in);
                 int x = sc.nextInt();
@@ -36,18 +35,15 @@ public class UserMenu {
                     rent_vehicle_select();
                         break;
                     case 3:
-
+                        print_active_renatls();
                         break;
                     case 4:
                         end_rental();
                         break;
                     case 5:
-
+                        print_rentals_history();
                         break;
                     case 6:
-
-                        break;
-                    case 7:
                         exit=true;
                         break;
 
@@ -205,6 +201,72 @@ public class UserMenu {
         }
 
     }
+    private static void print_active_renatls()
+    {
+        try {
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss = stmt.executeQuery("select * from rentals WHERE user_id='"+user_id+"' AND status='ACTIVE'");
+            while (rss.next())
+            {
+                int vehicle_id= rss.getInt(2);
+                String status= rss.getString(4);
+                Timestamp start= rss.getTimestamp(5);
 
 
+
+                for(int i=0;i<64;i++) System.out.print("-");System.out.print("\n");
+                System.out.printf("|%4s|%6s|%9s|%9s|%21s|%8s|\n","ID ","STATUS","CAR BRAND", "CAR MODEL","START DATE     ","DURATION");
+                for(int i=0;i<64;i++) System.out.print("-");System.out.print("\n");
+                System.out.printf("|%4s|%6s|%9s|%9s|%21s|%8s|\n",rss.getInt(1),status ,Rentals_details.get_car_brand(vehicle_id),Rentals_details.get_car_model(vehicle_id),start,getCurrentTimeStamp().getDate()-start.getDate()+1);
+                for(int i=0;i<64;i++) System.out.print("-");System.out.print("\n");
+            }
+
+
+            con.close();
+
+
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    protected static void print_rentals_history()
+    {
+
+        try {
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
+
+            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss = stmt.executeQuery("select * from rentals WHERE user_id='"+user_id+"'");
+
+
+
+                for(int i=0;i<92;i++) System.out.print("-");System.out.print("\n");
+                System.out.printf("|%10s|%6s|%9s|%9s|%21s|%21s|%8s|\n","RENTAL ID","STATUS" ,"CAR BRAND", "CAR MODEL","START DATE     ","END DATE     ","DURATION");
+                for(int i=0;i<92;i++) System.out.print("-");System.out.print("\n");
+            while(rss.next())
+            {
+                int vehicle_id= rss.getInt(2);
+
+
+                String status= rss.getString(4);
+                Timestamp start= rss.getTimestamp(5);
+                Timestamp end= rss.getTimestamp(6);
+                int duration = rss.getInt(7);
+                System.out.printf("|%10s|%6s|%9s|%9s|%21s|%21s|%8s|\n",rss.getInt(1),status,Rentals_details.get_car_brand(vehicle_id), Rentals_details.get_car_model(vehicle_id),start,end,duration);
+                for(int i=0;i<92;i++) System.out.print("-");System.out.print("\n");
+            }
+
+
+            con.close();
+
+
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 }

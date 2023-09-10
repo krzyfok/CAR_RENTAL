@@ -19,11 +19,12 @@ public class OwnerMenu extends AdminMenu{
             System.out.println("2. DELETE USER");
             System.out.println("3. PRINT VEHICLE LIST");
             System.out.println("4. EDIT VEHICLE LIST");
-            System.out.println("5. PRINT RENTALS HISTORY");
-            System.out.println("6. RENTAL DETAILS");
-            System.out.println("7. END RENTAL");
-            System.out.println("8. ADD ADMIN");
-            System.out.println("9. LOGOUT");
+            System.out.println("5. PRINT ACTIVE RENTALS");
+            System.out.println("6. PRINT RENTALS HISTORY");
+            System.out.println("7. RENTAL DETAILS");
+            System.out.println("8. END RENTAL");
+            System.out.println("9. ADD ADMIN");
+            System.out.println("10. LOGOUT");
             try {
                 Scanner sc = new Scanner(System.in);
                 int x = sc.nextInt();
@@ -43,18 +44,21 @@ public class OwnerMenu extends AdminMenu{
                         carlist_edit();
                         break;
                     case 5:
+                        print_active_rentals();
+                        break;
+                    case 6:
                         print_rentals();
                         break;
-                    case 6://sprawdzic
+                    case 7:
                         rentals_details();
                         break;
-                    case 7:
+                    case 8:
                         end_rental();
                         break;
-                    case 8:
+                    case 9:
                         add_admin();
                         break;
-                    case 9:
+                    case 10:
                         exit=true;
                         break;
 

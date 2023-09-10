@@ -2,7 +2,7 @@ import java.sql.*;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-public class AdminMenu{
+public class AdminMenu implements Rentals_details{
     public static int admin_id;
     public static void menu(){
 
@@ -20,10 +20,11 @@ public class AdminMenu{
                 System.out.println("2. DELETE USER");
                 System.out.println("3. PRINT VEHICLE LIST");
                 System.out.println("4. EDIT VEHICLE LIST");
-                System.out.println("5. PRINT RENTALS HISTORY");
-                System.out.println("6. RENTAL DETAILS");
-                System.out.println("7. END RENTAL");
-                System.out.println("8. LOGOUT");
+                System.out.println("5. PRINT ACTIVE RENTALS");
+                System.out.println("6. PRINT RENTALS HISTORY");
+                System.out.println("7. RENTAL DETAILS");
+                System.out.println("8. END RENTAL");
+                System.out.println("9. LOGOUT");
                 try {
                     Scanner sc = new Scanner(System.in);
                     int x = sc.nextInt();
@@ -43,16 +44,19 @@ public class AdminMenu{
                             carlist_edit();
                             break;
                         case 5:
-                           print_rentals();
+                          print_active_rentals();
                             break;
-                        case 6://sprawdzic
-                             rentals_details();
+                        case 6:
+                            print_rentals();
                             break;
                         case 7:
-                            end_rental();
+                            rentals_details();
                             break;
 
                         case 8:
+                            end_rental();
+                            break;
+                        case 9:
                             exit=true;
                             break;
 
@@ -316,7 +320,7 @@ public class AdminMenu{
              for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
              System.out.printf("|%10s|%6s|%9s|%12s|%9s|%9s|%21s|%21s|%8s|\n","RENTAL ID","STATUS","USER NAME" ,  "USER SURNAME" ,"CAR BRAND", "CAR MODEL","START DATE     ","END DATE     ","DURATION");
              for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
-             System.out.printf("|%10s|%6s|%9s|%12s|%9s|%9s|%21s|%21s|%8s|\n",rental_id,status,get_user_name(user_id) ,  get_user_surname(user_id) ,get_car_brand(vehicle_id), get_car_model(vehicle_id),start,end,duration);
+             System.out.printf("|%10s|%6s|%9s|%12s|%9s|%9s|%21s|%21s|%8s|\n",rental_id,status,get_user_name(user_id) ,  get_user_surname(user_id) ,Rentals_details.get_car_brand(vehicle_id), Rentals_details.get_car_model(vehicle_id),start,end,duration);
              for(int i=0;i<115;i++) System.out.print("-");System.out.print("\n");
          }
 
@@ -332,58 +336,25 @@ public class AdminMenu{
         System.out.println(e);
     }
     }
-    private  static String get_car_brand(int id)
+
+   private static String get_user_name(int id)
     {
         try{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
 
             Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rss = stmt.executeQuery("select * from cars WHERE id='"+id+"'");
+            ResultSet rss = stmt.executeQuery("select * from users WHERE id='"+id+"'");
             rss.next();
-            String brand=rss.getString(2);
+            String name=rss.getString(2);
             con.close();
-            return brand;
+            return name;
         }
         catch (Exception e) {
             System.out.println(e);
             return "ERROR";
         }
     }
-    private static String get_car_model(int id)
-    {
-        try{
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
-
-            Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet rss = stmt.executeQuery("select * from cars WHERE id='"+id+"'");
-            rss.next();
-            String model=rss.getString(3);
-            con.close();
-            return model;
-        }
-        catch (Exception e) {
-            System.out.println(e);
-            return "ERROR";
-        }
-    }
-    private static String get_user_name(int id)
-    {
-        try{
-        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
-
-        Statement stmt = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-        ResultSet rss = stmt.executeQuery("select * from users WHERE id='"+id+"'");
-        rss.next();
-        String name=rss.getString(2);
-        con.close();
-        return name;
-        }
-        catch (Exception e) {
-            System.out.println(e);
-            return "ERROR";
-        }
-    }
-    private static String get_user_surname(int id)
+   private static String get_user_surname(int id)
     {
         try{
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental", "root", "root");
@@ -400,7 +371,26 @@ public class AdminMenu{
             return "ERROR";
         }
     }
+    protected static void print_active_rentals()
+    {
+        try{ Connection cosn= DriverManager.getConnection("jdbc:mysql://localhost:3306/carrental","root","root");
 
+            Statement stmt=cosn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            ResultSet rss=stmt.executeQuery("select * from rentals WHERE status='ACTIVE'");
+
+            for(int i=0;i<63;i++) System.out.print("-");System.out.print("\n");
+            System.out.printf("|%4s|%10s|%7s|%6s|%21s|%8s|\n","ID ","VEHICLE ID" ,  "USER ID" ,"STATUS", "START DATE     ","DURATION");
+            for(int i=0;i<63;i++) System.out.print("-");System.out.print("\n");
+            while (rss.next())
+            { System.out.printf("|%-4s|%-10s|%-7s|%-6s|%-21s|%8s|\n",rss.getInt(1),rss.getInt(2) ,  rss.getInt(3) , rss.getString(4),rss.getTimestamp(5),getCurrentTimeStamp().getDate()-rss.getTimestamp(5).getDate()+1);
+                for(int i=0;i<63;i++) System.out.print("-");System.out.print("\n");
+            }
+            cosn.close();
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
     }
 
